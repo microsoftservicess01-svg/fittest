@@ -1,0 +1,23 @@
+
+version: '3.8'
+services:
+  backend:
+    build: ./backend
+    ports:
+      - '5000:5000'
+    depends_on:
+      - redis
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - CACHE_TTL_SECONDS=300
+  frontend:
+    build: ./frontend
+    ports:
+      - '8080:80'
+    depends_on:
+      - backend
+  redis:
+    image: redis:6-alpine
+    command: ["redis-server","--save","","--appendonly","no"]
+    restart: unless-stopped
