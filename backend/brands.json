@@ -1,0 +1,41 @@
+[
+  {
+    "brand": "BrandA",
+    "styles": [
+      {
+        "id": 1,
+        "name": "Regular Bra"
+      },
+      {
+        "id": 2,
+        "name": "Padded Bra"
+      }
+    ]
+  },
+  {
+    "brand": "BrandB",
+    "styles": [
+      {
+        "id": 3,
+        "name": "Unpadded Bra"
+      },
+      {
+        "id": 4,
+        "name": "T-Shirt Bra"
+      }
+    ]
+  },
+  {
+    "brand": "BrandC",
+    "styles": [
+      {
+        "id": 5,
+        "name": "Balconette"
+      },
+      {
+        "id": 6,
+        "name": "Full Coverage"
+      }
+    ]
+  }
+]
