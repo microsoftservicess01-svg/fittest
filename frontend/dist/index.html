@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Fit Test - React</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div id="root"></div>
+  <!-- React and Babel CDNs (Babel for in-browser JSX transpile - ok for prototype) -->
+  <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/prop-types/prop-types.min.js"></script>
+  <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+  <script type="text/babel">
+  const {useState} = React;
+
+  const steps = [
+    { key: 'issues', title: 'Do you face any of the following issues?', options: ['Underwire digs','Wires lifting','Cups not filled','Bulging','All OK'] },
+    { key: 'strap', title: 'How do your straps feel?', options: ['falling','tight','fine'] },
+    { key: 'settle', title: 'How far are they set?', options: ['touching','spread','outward'] },
+    { key: 'shape', title: 'What is your shape?', options: ['rounded','shallow'] },
+    { key: 'band', title: 'Band size', options: ['26','28','30','32','34','36','38','40','42','44'] },
+    { key: 'cup', title: 'Cup size', options: ['A','B','C','D','DD','E','F','G'] }
+  ];
+
+  function Stepper({onSubmit}){
+    const [index, setIndex] = useState(0);
+    const [answers, setAnswers] = useState({});
+    const [loading, setLoading] = useState(false);
+    const [result, setResult] = useState(null);
+
+    const step = steps[index];
+
+    function choose(value){
+      setAnswers(a => ({...a, [step.key]: value}));
+    }
+
+    function next(){
+      if(index < steps.length-1) setIndex(i=>i+1);
+    }
+    function prev(){ if(index>0) setIndex(i=>i-1); }
+
+    async function submitAll(){
+      setLoading(true);
+      try{
+        const resp = await fetch('/api/submit', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({answers})});
+        const data = await resp.json();
+        setResult(data);
+        setLoading(false);
+        if(onSubmit) onSubmit(data);
+      }catch(e){ setLoading(false); alert('Error: '+e.message); }
+    }
+
+    return (
+      <div className="card">
+        <h2>Step {index+1} / {steps.length}</h2>
+        <h3>{step.title}</h3>
+        <div className="options">
+          {step.options.map(opt => (
+            <label key={opt} className={'opt ' + ((answers[step.key]===opt)?'sel':'')}>
+              <input type="radio" name={step.key} checked={answers[step.key]===opt} onChange={()=>choose(opt)} />
+              <span>{opt}</span>
+            </label>
+          ))}
+        </div>
+        <div className="nav">
+          <button onClick={prev} disabled={index===0}>Back</button>
+          {index < steps.length-1 ? (
+            <button onClick={next}>Next</button>
+          ) : (
+            <button onClick={submitAll} disabled={loading}>{loading? 'Working...':'Submit'}</button>
+          )}
+        </div>
+        {result && (
+          <div className="result">
+            <h4>Recommended: {result.result.recommended_category}</h4>
+            <ul>
+              {result.result.samples.map(s=> <li key={s.brand}><strong>{s.brand}</strong>: {s.style.name}</li>)}
+            </ul>
+            <small>Session: {result.session_id} (expires in {result.ttl_seconds}s)</small>
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  function App(){
+    return <div className="app"><header><h1>Find your perfect bra</h1></header><main><Stepper/></main><Footer/></div>;
+  }
+
+  function Footer(){ return (<footer className="footer"><div className="assets"><img src="assets/Screenshot_2025-12-09-20-41-29-41_40deb401b9ffe8e1df2f1cc5ba480b12.jpg" alt="asset" />
+<img src="assets/Screenshot_2025-12-09-20-41-24-97_40deb401b9ffe8e1df2f1cc5ba480b12.jpg" alt="asset" />
+<img src="assets/Screenshot_2025-12-09-20-41-21-30_40deb401b9ffe8e1df2f1cc5ba480b12.jpg" alt="asset" />
+<img src="assets/Screenshot_2025-12-09-20-41-17-27_40deb401b9ffe8e1df2f1cc5ba480b12.jpg" alt="asset" />
+<img src="assets/Screenshot_2025-12-09-20-41-12-23_40deb401b9ffe8e1df2f1cc5ba480b12.jpg" alt="asset" />
+<img src="assets/Screenshot_2025-12-09-20-41-08-51_40deb401b9ffe8e1df2f1cc5ba480b12.jpg" alt="asset" />
+<img src="assets/Screenshot_2025-12-09-20-41-04-01_40deb401b9ffe8e1df2f1cc5ba480b12.jpg" alt="asset" />
+<img src="assets/Screenshot_2025-12-09-20-40-58-89_40deb401b9ffe8e1df2f1cc5ba480b12.jpg" alt="asset" /></div></footer>); }
+
+  ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+  </script>
+</body>
+</html>
